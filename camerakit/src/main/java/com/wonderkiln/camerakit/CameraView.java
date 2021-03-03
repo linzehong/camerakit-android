@@ -16,23 +16,26 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.hardware.display.DisplayManagerCompat;
-import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.hardware.display.DisplayManagerCompat;
+import androidx.core.view.ViewCompat;
+
+import com.camerakit.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.vision.text.TextRecognizer;
-import com.wonderkiln.camerakit.core.R;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -459,6 +462,7 @@ public class CameraView extends CameraViewLayout {
 
     public void captureImage(final CameraKitEventCallback<CameraKitImage> callback) {
         mCameraImpl.captureImage(new CameraImpl.ImageCapturedCallback() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void imageCaptured(byte[] jpeg) {
                 PostProcessor postProcessor = new PostProcessor(jpeg);

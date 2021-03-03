@@ -3,14 +3,15 @@ package com.wonderkiln.camerakit;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.wonderkiln.camerakit.core.R;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.camerakit.R;
 
 public class FocusMarkerLayout extends FrameLayout {
 
