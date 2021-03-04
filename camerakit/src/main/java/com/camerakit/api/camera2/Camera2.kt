@@ -9,6 +9,7 @@ import android.media.ImageReader
 import androidx.annotation.RequiresApi
 import android.util.Log
 import android.view.Surface
+import com.camerakit.CameraPreview
 import com.camerakit.api.CameraApi
 import com.camerakit.api.CameraAttributes
 import com.camerakit.api.CameraEvents
@@ -315,4 +316,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
 
     }
 
+    override fun setFrameCallback(callback: CameraPreview.FrameCallback?) {
+        TODO("Not yet implemented")
+    }
 }

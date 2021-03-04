@@ -24,6 +24,7 @@ import jpegkit.Jpeg;
 import jpegkit.JpegImageView;
 
 public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener {
+    private static final String TAG = "MainActivity";
 
     private CameraKitView cameraView;
     private Toolbar toolbar;
@@ -120,6 +121,13 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
             @Override
             public void onStop() {
                 Log.v("CameraKitView", "PreviewListener: onStop()");
+            }
+        });
+
+        cameraView.setFrameListener(new CameraKitView.FrameListener() {
+            @Override
+            public void onFrame(byte[] yuv_image) {
+                Log.v("CameraKitView", "FrameCallback: onFrame()");
             }
         });
     }

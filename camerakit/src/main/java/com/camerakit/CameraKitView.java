@@ -196,13 +196,19 @@ public class CameraKitView extends GestureLayout {
 
     }
 
-    public interface FrameCallback {
+    public interface FrameListener {
+
+//        /**
+//         * @param view
+//         * @param jpeg
+//         */
+//        void onFrame(CameraKitView view, byte[] jpeg);
 
         /**
-         * @param view
-         * @param jpeg
+         *
+         * @param yuv_image 相加原始数据
          */
-        void onFrame(CameraKitView view, byte[] jpeg);
+        void onFrame(byte[] yuv_image);
 
     }
 
@@ -222,6 +228,7 @@ public class CameraKitView extends GestureLayout {
     private PreviewListener mPreviewListener;
     private ErrorListener mErrorListener;
     private PermissionsListener mPermissionsListener;
+    private FrameListener mFrameListener;
 
     private static CameraFacing cameraFacing;
     private static CameraFlash cameraFlash;
@@ -313,6 +320,18 @@ public class CameraKitView extends GestureLayout {
                         @Override
                         public void run() {
                             mPreviewListener.onStop();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFrame(@NotNull final byte[] yuv_image) {
+                if (mFrameListener != null) {
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mFrameListener.onFrame(yuv_image);
                         }
                     });
                 }
@@ -504,15 +523,15 @@ public class CameraKitView extends GestureLayout {
     /**
      *
      */
-    public void captureFrame(FrameCallback callback) {
+    public void captureFrame(FrameListener callback) {
 
     }
 
     /**
      *
      */
-    public void setFrameCallback(FrameCallback callback) {
-
+    public void setFrameListener(FrameListener frameListener) {
+        mFrameListener = frameListener;
     }
 
     /**

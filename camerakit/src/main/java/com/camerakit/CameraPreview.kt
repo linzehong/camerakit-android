@@ -3,6 +3,7 @@ package com.camerakit
 import android.content.Context
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log.d
 import android.view.WindowManager
 import android.widget.FrameLayout
 import com.camerakit.preview.CameraSurfaceTexture
@@ -28,7 +29,9 @@ import kotlin.coroutines.resumeWithException
 class CameraPreview : FrameLayout, CameraEvents {
 
     companion object {
-        private const val FORCE_DEPRECATED_API = false
+        private const val TAG = "CameraPreview"
+
+        private const val FORCE_DEPRECATED_API = true
     }
 
     var lifecycleState: LifecycleState = LifecycleState.STOPPED
@@ -79,6 +82,12 @@ class CameraPreview : FrameLayout, CameraEvents {
     private val cameraDispatcher: CoroutineDispatcher = newSingleThreadContext("CAMERA")
     private var cameraOpenContinuation: Continuation<Unit>? = null
     private var previewStartContinuation: Continuation<Unit>? = null
+
+    private val frameCallback : FrameCallback? = object : FrameCallback {
+        override fun handleFrame(yuv_image: kotlin.ByteArray?) {
+            listener?.onFrame(yuv_image)
+        }
+    }
 
     @SuppressWarnings("NewApi")
     private val cameraApi: CameraApi = ManagedCameraApi(
@@ -169,6 +178,10 @@ class CameraPreview : FrameLayout, CameraEvents {
 
     interface PhotoCallback {
         fun onCapture(jpeg: ByteArray)
+    }
+
+    interface FrameCallback {
+        fun handleFrame(yuv_image: ByteArray?)
     }
 
     // CameraEvents:
@@ -275,6 +288,7 @@ class CameraPreview : FrameLayout, CameraEvents {
             cameraApi.setPreviewOrientation(previewOrientation)
             cameraApi.setPreviewSize(previewSize)
             cameraApi.setPhotoSize(photoSize)
+            cameraApi.setFrameCallback(frameCallback)
             cameraApi.startPreview(surfaceTexture)
         } else {
             it.resumeWithException(IllegalStateException())
@@ -299,6 +313,7 @@ class CameraPreview : FrameLayout, CameraEvents {
         fun onCameraClosed()
         fun onPreviewStarted()
         fun onPreviewStopped()
+        fun onFrame(yuv_image: ByteArray?)
     }
 
 }

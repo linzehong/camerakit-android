@@ -1,6 +1,7 @@
 package com.camerakit.api
 
 import android.graphics.SurfaceTexture
+import com.camerakit.CameraPreview
 import com.camerakit.type.CameraFacing
 import com.camerakit.type.CameraFlash
 import com.camerakit.type.CameraSize
@@ -19,5 +20,5 @@ interface CameraActions {
     fun setPhotoSize(size: CameraSize)
     fun capturePhoto(callback: (jpeg: ByteArray) -> Unit)
 
-
+    fun setFrameCallback(callback: CameraPreview.FrameCallback?)
 }

@@ -1,11 +1,11 @@
 package com.camerakit.api.camera1
 
+import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.Camera
-import com.camerakit.api.CameraApi
-import com.camerakit.api.CameraAttributes
-import com.camerakit.api.CameraEvents
-import com.camerakit.api.CameraHandler
+import android.util.Log.d
+import com.camerakit.CameraPreview
+import com.camerakit.api.*
 import com.camerakit.api.camera1.ext.getFlashes
 import com.camerakit.api.camera1.ext.getPhotoSizes
 import com.camerakit.api.camera1.ext.getPreviewSizes
@@ -16,10 +16,24 @@ import com.camerakit.type.CameraSize
 class Camera1(eventsDelegate: CameraEvents) :
         CameraApi, CameraEvents by eventsDelegate {
 
+    companion object{
+        private const val TAG = "Camera1"
+    }
+
     override val cameraHandler: CameraHandler = CameraHandler.get()
 
     private var camera: Camera? = null
     private var cameraAttributes: CameraAttributes? = null
+
+    //在preview callback中调用一次的标记
+    //由于使用了setPreviewCallbackWithBuffer()，这个会覆盖掉之前的setOneShotPreviewCallback()，
+    //设置标记，以便能正常调用onPreviewStarted()，否则会有问题(切到后台再回来时画面卡住)
+    private var bOneShot: Boolean = true;
+
+    private var frameCallback: CameraPreview.FrameCallback? = null
+    override fun setFrameCallback(callback: CameraPreview.FrameCallback?) {
+        frameCallback = callback
+    }
 
     @Synchronized
     override fun open(facing: CameraFacing) {
@@ -46,6 +60,8 @@ class Camera1(eventsDelegate: CameraEvents) :
 
     @Synchronized
     override fun release() {
+        bOneShot = true;
+        camera?.setPreviewCallbackWithBuffer(null)
         camera?.release()
         camera = null
         cameraAttributes = null
@@ -84,6 +100,24 @@ class Camera1(eventsDelegate: CameraEvents) :
             camera.setOneShotPreviewCallback { _, _ ->
                 onPreviewStarted()
             }
+
+            // 设置回调
+            val previewSize = parameters.previewSize
+            val bufferSize = previewSize.width * previewSize.height * ImageFormat.getBitsPerPixel(parameters.previewFormat)
+            camera.addCallbackBuffer(ByteArray(bufferSize))
+            camera.setPreviewCallbackWithBuffer { yuv_image, camera ->
+                if (bOneShot) {
+                    onPreviewStarted()
+                    bOneShot = false
+                }
+
+                if (frameCallback != null) {
+                    frameCallback!!.handleFrame(yuv_image)
+                }
+                camera.addCallbackBuffer(yuv_image)
+            }
+            // 设置回调
+
             camera.startPreview()
         }
     }
